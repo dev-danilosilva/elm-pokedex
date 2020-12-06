@@ -3,6 +3,8 @@ elm-stuff
 # elm-repl generated files
 repl-temp-*
 node_modules
+yarn.lock
 yarn-error.log
 .DS_Store
 .cache
+dist
