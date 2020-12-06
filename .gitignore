@@ -4,6 +4,5 @@ elm-stuff
 repl-temp-*
 node_modules
 yarn-error.log
-yarn.lock
 .DS_Store
 .cache
