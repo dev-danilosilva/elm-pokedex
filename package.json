@@ -1,0 +1,21 @@
+{
+  "name": "elm-pokedex",
+  "version": "1.0.0",
+  "description": "Pokedex Api Client built with Elm",
+  "main": "index.js",
+  "repository": "https://github.com/dev-danilosilva/elm-pokedex.git",
+  "author": "Danilo Silva <danilo_silva@ethercity.tech>",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel public/index.html",
+    "build": "parcel build public/index.html"
+  },
+  "devDependencies": {
+    "bulma": "^0.9.1",
+    "elm-hot": "^1.1.5",
+    "node-elm-compiler": "^5.0.5",
+    "parcel-bundler": "^1.12.4",
+    "sass": "^1.30.0"
+  },
+  "dependencies": {}
+}
