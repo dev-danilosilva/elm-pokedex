@@ -5,12 +5,21 @@ import Html.Attributes exposing (class, placeholder, type_)
 import Html.Events exposing (onInput, onClick)
 import Browser
 import Utils exposing (nothingIfEmpty, newState)
-import Dict exposing (Dict)
+
+
+main : Program () Model Msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = \_ -> Sub.none
+        }
 
 type alias PokeResult = 
     { name : String
     , element : String
-    , stats   : Dict String Int
+    , stats   : String
     }
 
 type SearchState
@@ -26,29 +35,30 @@ type Msg
     = SavePokeQuery String
     | Search
 
+
+init : a -> (Model, Cmd Msg)
+init _ = ({q = Nothing, searchState = Loaded (Err "No results")}, Cmd.none)
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
 
     SavePokeQuery q ->
         let
-            updatedQ =
+            maybeQ =
                 q
                 |> String.toLower
                 |> nothingIfEmpty
         in
-            newState { model | q = updatedQ } Cmd.none
+            newState { model | q = maybeQ } Cmd.none
     
     Search  -> newState { model | searchState = Loading } Cmd.none
 
-
-init : a -> (Model, Cmd Msg)
-init _ = ({q = Nothing, searchState = Loaded (Err "No results")}, Cmd.none)
 
 view : Model -> Html Msg
 view model =
     div [class "container"]
         [ viewPageHeader
-        , viewPokeResults
+        , viewPokeResults model.q
         ]
 
 
@@ -72,16 +82,9 @@ viewPageHeader =
         ]
 
 
-viewPokeResults : Html Msg
-viewPokeResults =
-    text "Error"
+viewPokeResults : Maybe String -> Html Msg
+viewPokeResults str = case str of
+    Just q  -> text q
 
+    Nothing -> text "No Result"
 
-main : Program () Model Msg
-main =
-    Browser.element
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = \_ -> Sub.none
-        }
