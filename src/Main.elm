@@ -1,29 +1,38 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, h1, p, text, input, a, i)
-import Html.Attributes exposing (class, placeholder, type_)
-import Html.Events exposing (onInput, onClick)
 import Browser
+import Http
+import Html.Events exposing (onInput, onClick)
 import Utils exposing (nothingIfEmpty, newState)
-import Dict exposing (Dict)
-import Html exposing (span)
-import Html exposing (q)
-import PokeApiClient exposing (requestPokemonList)
-import Http as Http
+import Html.Attributes exposing (class, placeholder, type_)
+import Html exposing (Html, div, h1, p, text, input, a, i, span, ul, li)
 
-type SearchState
-    = Loading
-    | Loaded (Result Http.Error String)
+import PokeApiClient exposing (requestPokemonList, PokemonList)
+
+main : Program () Model Msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = \_ -> Sub.none
+        }
+
 
 type alias Model =
     { q : Maybe String
-    , searchState : SearchState
+    , pokemonList : PokemonList
     }
 
 type Msg
     = SavePokeQuery String
     | Search
-    | ApiResponse (Result Http.Error String)
+    | ApiPokeList (Result Http.Error PokemonList)
+
+
+init : flags -> (Model, Cmd Msg)
+init _ = ({q = Nothing, pokemonList = []}, requestPokemonList ApiPokeList)
+
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
@@ -33,27 +42,36 @@ update msg model = case msg of
             updatedQ =
                 q
                 |> String.toLower
+                |> String.trim
+                |> String.replace " " "-"
                 |> nothingIfEmpty
         in
             newState { model | q = updatedQ } Cmd.none
-    
-    Search  -> newState { model | searchState = Loading } (requestPokemonList ApiResponse)
 
-    ApiResponse res -> newState { model | searchState = Loaded res }  Cmd.none
+    Search  -> newState { model | pokemonList = [] } (requestPokemonList ApiPokeList)
+
+    ApiPokeList res -> case res of
+        Ok pokemonList ->
+            newState { model | pokemonList = pokemonList }  Cmd.none
+        Err error ->
+            newState { model | pokemonList = [] } Cmd.none
 
 
 
-init : flags -> (Model, Cmd Msg)
-init _ = ({q = Nothing, searchState = Loaded (Ok "No Results")}, Cmd.none)
+
 
 view : Model -> Html Msg
 view model =
     div [class "container"]
         [ viewPageHeader
         , viewSearchBar
-        , viewPokeResults model.q
+        , text <| mirror model.q
+        , viewPokeResults model
         ]
 
+mirror mx = case mx of
+    Just x -> x
+    Nothing -> ""
 
 viewPageHeader : Html Msg
 viewPageHeader =
@@ -79,18 +97,10 @@ viewSearchBar =
             ]
         ]
 
-viewPokeResults : Maybe String -> Html Msg
-viewPokeResults q = case q of
-    Nothing -> text "No Results"
 
-    Just x  -> text x
+viewPokeResults : Model -> Html Msg
+viewPokeResults model = ul [] <| List.map (\pk -> li [] [text pk.name]) (List.filter (\pk -> String.startsWith (mirror model.q) pk.name) model.pokemonList )
 
 
-main : Program () Model Msg
-main =
-    Browser.element
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = \_ -> Sub.none
-        }
+
+

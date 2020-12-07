@@ -2,34 +2,30 @@ module PokeApiClient exposing (..)
 
 
 import Http as Http
+import Json.Decode as Json
 
 
 type alias PokeUrl = String
 
-type alias ListLimit = Int
-
-type ApiResponse
-    = ApiResponse (Result Http.Error String)
-
-type alias PokeList = List PokeListItem
-
-type PokeListItem = PokeListItem
-    { name : String
-    , url  : String
-    }
 
 type alias QueryParam =
     { property : String
     , value    : String
     }
 
+type alias PokemonListItem =
+    { name : String
+    , url  : String
+    }
+
+type alias PokemonList = List PokemonListItem
 
 baseUrl : PokeUrl
 baseUrl = "https://pokeapi.co/api/v2/"
 
 
-listLimit : ListLimit
-listLimit = 200
+listLimit : Int
+listLimit = 1118
 
 
 buildUrl : List String -> List QueryParam -> String
@@ -44,10 +40,16 @@ buildQueryParams params =
     in
         compiledParams
 
-
-requestPokemonList : (Result Http.Error String -> msg) -> Cmd msg
+requestPokemonList : (Result Http.Error (PokemonList) -> msg) -> Cmd msg
 requestPokemonList msg = Http.get
                             { url = buildUrl ["pokemon"] [QueryParam "limit" (String.fromInt listLimit)]
-                            , expect = Http.expectString msg
+                            , expect = Http.expectJson msg pokemonListDecoder
                             }
 
+pokemonListDecoder : Json.Decoder PokemonList
+pokemonListDecoder = Json.field "results" (Json.list pokemonListItemDecoder)
+
+pokemonListItemDecoder : Json.Decoder PokemonListItem
+pokemonListItemDecoder = Json.map2 PokemonListItem
+                            (Json.field "name" Json.string)
+                            (Json.field "url"  Json.string)
