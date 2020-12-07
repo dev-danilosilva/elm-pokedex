@@ -36,9 +36,9 @@ buildQueryParams : List QueryParam -> String
 buildQueryParams params =
     let
         buildedParams = "?" ++ (List.foldl (\param builded -> builded ++ param.property ++ "=" ++ param.value ++ "&") "" params)
-        compiledParams = String.dropRight 1 buildedParams
+        finalParams = String.dropRight 1 buildedParams
     in
-        compiledParams
+        finalParams
 
 requestPokemonList : (Result Http.Error (PokemonList) -> msg) -> Cmd msg
 requestPokemonList msg = Http.get

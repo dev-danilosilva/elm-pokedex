@@ -58,18 +58,16 @@ update msg model = case msg of
 
 
 
-
-
 view : Model -> Html Msg
 view model =
     div [class "container"]
         [ viewPageHeader
         , viewSearchBar
-        , text <| mirror model.q
+        , text <| extractString model.q
         , viewPokeResults model
         ]
 
-mirror mx = case mx of
+extractString mx = case mx of
     Just x -> x
     Nothing -> ""
 
@@ -99,7 +97,10 @@ viewSearchBar =
 
 
 viewPokeResults : Model -> Html Msg
-viewPokeResults model = ul [] <| List.map (\pk -> li [] [text pk.name]) (List.filter (\pk -> String.startsWith (mirror model.q) pk.name) model.pokemonList )
+viewPokeResults model = ul []
+                            <| List.map
+                                (\pk -> li [] [text pk.name])
+                                (List.filter (\pk -> String.startsWith (extractString model.q) pk.name) model.pokemonList)
 
 
 
