@@ -26,7 +26,7 @@ type alias PokemonSprite = String
 
 type alias Pokemon =
     { pokemonName : PokemonName
-    , pokemonType : List PokemonType
+    , pokemonTypes : List PokemonType
     , pokemonSprite: PokemonSprite
     }
 
