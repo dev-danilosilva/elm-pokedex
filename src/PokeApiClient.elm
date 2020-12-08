@@ -20,6 +20,16 @@ type alias PokemonListItem =
 
 type alias PokemonList = List PokemonListItem
 
+type alias PokemonType   = String
+type alias PokemonName   = String
+type alias PokemonSprite = String
+
+type alias Pokemon =
+    { pokemonName : PokemonName
+    , pokemonType : List PokemonType
+    , pokemonSprite: PokemonSprite
+    }
+
 baseUrl : PokeUrl
 baseUrl = "https://pokeapi.co/api/v2/"
 
@@ -36,20 +46,44 @@ buildQueryParams : List QueryParam -> String
 buildQueryParams params =
     let
         buildedParams = "?" ++ (List.foldl (\param builded -> builded ++ param.property ++ "=" ++ param.value ++ "&") "" params)
-        finalParams = String.dropRight 1 buildedParams
     in
-        finalParams
+        String.dropRight 1 buildedParams
 
 requestPokemonList : (Result Http.Error (PokemonList) -> msg) -> Cmd msg
 requestPokemonList msg = Http.get
                             { url = buildUrl ["pokemon"] [QueryParam "limit" (String.fromInt listLimit)]
                             , expect = Http.expectJson msg pokemonListDecoder
                             }
+requestPokemonData : PokemonListItem -> (Result Http.Error Pokemon -> msg) -> Cmd msg
+requestPokemonData pokemon msg = Http.get
+                        { url = pokemon.url
+                        , expect = Http.expectJson msg pokemonDetailsDecoder
+                        }
+
 
 pokemonListDecoder : Json.Decoder PokemonList
 pokemonListDecoder = Json.field "results" (Json.list pokemonListItemDecoder)
 
 pokemonListItemDecoder : Json.Decoder PokemonListItem
-pokemonListItemDecoder = Json.map2 PokemonListItem
-                            (Json.field "name" Json.string)
-                            (Json.field "url"  Json.string)
+pokemonListItemDecoder = Json.map2
+                            PokemonListItem (Json.field "name" Json.string) (Json.field "url"  Json.string)
+
+
+pokemonNameDecoder : Json.Decoder PokemonName
+pokemonNameDecoder = Json.field "name" Json.string
+
+pokemonTypeListDecoder : Json.Decoder (List PokemonType)
+pokemonTypeListDecoder = Json.field "name" Json.string
+                         |> Json.field "type"
+                         |> Json.list
+                         |> Json.field "types"
+
+pokemonSpriteDecoder : Json.Decoder PokemonSprite
+pokemonSpriteDecoder = Json.field "front_default" Json.string
+                       |> Json.field "official-artwork"
+                       |> Json.field "other"
+                       |> Json.field "sprites"
+
+pokemonDetailsDecoder = Json.map3
+                            Pokemon pokemonNameDecoder pokemonTypeListDecoder pokemonSpriteDecoder
+
