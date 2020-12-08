@@ -85,7 +85,7 @@ update msg model = case msg of
 
     ApiPokeData res -> case res of
         Ok result ->
-            newState { model | searchStatus = Loaded,  selectedPokemon = Just (Debug.log "search" result)} Cmd.none
+            newState { model | searchStatus = Loaded,  selectedPokemon = Just result} Cmd.none
 
         Err _ ->
             newState { model | searchStatus = LoadError "Load Error"} Cmd.none
