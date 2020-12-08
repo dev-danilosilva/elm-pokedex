@@ -8,5 +8,4 @@ yarn-error.log
 yarn.lock
 .DS_Store
 .cache
-dist
 .idea
