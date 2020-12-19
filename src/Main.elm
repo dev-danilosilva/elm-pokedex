@@ -169,9 +169,12 @@ viewPokeResults model = case model.searchStatus of
 selectTypeColor : String -> String
 selectTypeColor pokemonType = case pokemonType of
     "dragon"    -> "is-success"
+    "grass"     -> "is-success is-light"
+    "poison"    -> "is-success"
     "fire"      -> "is-danger"
     "water"     -> "is-info"
-    "flying"    -> "is-light"
     "electric"  -> "is-warning"
     "dark"      -> "is-dark"
+    "ghost"     -> "is-dark"
+    "flying"    -> "is-info is-light"
     _           -> "is-info"
